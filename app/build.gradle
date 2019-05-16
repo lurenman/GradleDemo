@@ -1,0 +1,202 @@
+apply plugin: 'com.android.application'
+apply from: this.file("releaseinfo.gradle")
+android {
+    // compileSdkVersion this.mCompileSdkVersion
+    //  android.mCompileSdkVersion 这种定义会android冲突，要不改变map key
+    //要不就直接 rootProject.ext. 这种还是推荐的
+    // compileSdkVersion rootProject.ext.android.mCompileSdkVersion
+    compileSdkVersion rootProject.ext.Android.mCompileSdkVersion
+    defaultConfig {
+        applicationId "tianque.com.gradledemo"
+        minSdkVersion 17
+        targetSdkVersion 28
+        versionCode rootProject.ext.Android.mVersionCode
+        versionName rootProject.ext.Android.mVersionName
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation dependence.libSupportV7
+
+    implementation(dependence.libSupportV7) {
+        exclude module: "haha-lib"
+        //transitive false //传递依赖 默认是false  v7里面是true了要不编译不过
+    }
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+
+def getMyParent() {
+    def parent = this.getParent()
+    if (parent != null) {
+        println("parent project:" + parent.name)
+    } else {
+        println("parent project:null")
+    }
+}
+
+//this.getMyParent()
+//copy {
+//    from()
+//    into()
+//    //拷贝中排除的文件
+//    exclude {
+//
+//    }
+//    //也可以给文件重命名
+//    rename {
+//
+//    }
+//}
+//文件树的遍历操作可以 遍历文件夹
+//fileTree("build/outputs/apk/") {
+//    FileTree fileTree ->
+//        fileTree.visit { FileTreeElement element ->
+//            println("the file name:" + element.name)
+//        }
+//}
+//外部命令用exec{}
+
+task hellotask {
+    println "I am hellotask"
+}
+//这种可以定义组和描述
+task hellotask1(group: "lrm", description: "task study") {
+    //  println "I am hellotask1"
+}
+task hellotask2 {
+//    setGroup("lrm")
+//    setDescription("task study")
+    group "lrm"
+    description "task study"
+    //println "I am hellotask2"
+}
+//通过TaskContainer 创建
+this.tasks.create("hellotask3") {
+    group "lrm"
+    description "task study"
+    //println "I am hellotask3"
+    doFirst {
+        println("the task3 dofirst2")
+    }
+}
+/**
+ * 外面的先执行,这种是执行在gradle 执行阶段
+ * 这是在任务执行开始前
+ */
+hellotask3.doFirst {
+    println("the task3 dofirst1")
+}
+//在hellotask3任务执行之后
+hellotask3.doLast {
+    println("the task3 doLast")
+}
+//需求统计check命令执行阶段时长
+def startchecktime, endchecktime
+//afterEvaluate 在这配置阶段之后我们在去拿到task做相应的操作
+this.afterEvaluate {
+    Project project ->
+        //找到build 开始执行的task
+        def prebuild = project.tasks.getByName("preBuild")
+        prebuild.doFirst {
+            startchecktime = System.currentTimeMillis()
+            println("the prebuild start time:${startchecktime}")
+        }
+        def check = project.tasks.getByName("check")
+        println("the checktask name:" + check.name)
+        //代表check执行之后的操作
+        check.doLast {
+            endchecktime = System.currentTimeMillis()
+            println("the check end time:${endchecktime}")
+            def checkBuildTime = endchecktime - startchecktime
+            println("the check total time:${checkBuildTime}")
+        }
+}
+
+//task dependsOn 依赖关系测试
+
+task taskA {
+    group "lrm"
+    doLast {
+        println("dolast......taskA")
+    }
+}
+task taskB {
+    group "lrm"
+    doLast {
+        println("dolast......taskB")
+    }
+}
+task taskC(dependsOn: [taskA, taskB]) {
+    group "lrm"
+//    def hashset = new HashSet()
+//    hashset.addAll([taskA, taskB])
+//    dependsOn hashset
+    doLast {
+        println("dolast......taskC")
+    }
+}
+//taskC.dependsOn(taskA, taskB)
+
+//<< 这个符号代表doLast
+task lib1(group: "lrm") << {
+    println("dolast......lib1")
+
+}
+task lib2 {
+    group "lrm"
+    doLast {
+        println("dolast......lib2")
+    }
+}
+task nolib(group: "lrm") << {
+    println("dolast......nolib")
+}
+task taskD() {
+    group "lrm"
+    //这个理在前面task配置好之后在搞
+    dependsOn this.tasks.findAll { task ->
+        return task.name.startsWith("lib")
+    }
+    doLast {
+        println("dolast......taskD")
+    }
+}
+//直接调起task
+//taskD.execute()
+
+task taskX {
+    group "lrm"
+    doLast {
+        println("dolast........taskX")
+    }
+}
+task taskY {
+    group "lrm"
+    mustRunAfter taskX
+    // shouldRunAfter taskX
+    doLast {
+        println("dolast........taskY")
+    }
+}
+task taskZ {
+    group "lrm"
+    mustRunAfter taskY
+    doLast {
+        println("dolast........taskZ")
+    }
+}
+
+
+
+

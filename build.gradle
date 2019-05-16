@@ -1,0 +1,203 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+//apply (from: this.file('version.gradle'))
+//apply {
+//
+//}
+apply from: this.file('version.gradle')
+buildscript {
+    //配置我们工程仓库依赖地址
+    repositories {
+        google()
+        jcenter()
+    }
+    //配置我们工程插件依赖地址
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+/**
+ * 配置当前 project及sub project
+ * 就是配置所有的工程
+ */
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+/**
+ * 不包含当前结点工程，只包含
+ */
+subprojects {
+        //这个就可以对subproject做一些事情
+    Project project ->
+        if (project.plugins.hasPlugin('com.android.library')) {
+            //可以单独给库的一些操作例如上传maven
+        }
+        // println("---subprojects---" + project.name)
+}
+subprojects {
+    Project project ->
+        // println("---subprojects1---" + project.name)
+        //可以为每个subproject配置扩展属性，这种每个subproject都定义了不太好
+//        ext{
+//            mCompileSdkVersion=28
+//            mSupportappcompat='com.android.support:appcompat-v7:28.0.0'
+//        }
+}
+//可以在本根project中定义，子类直接可以拿到（因为是继承关系）
+//ext {
+//    mCompileSdkVersion = 28
+//    libSupportV7 = 'com.android.support:appcompat-v7:28.0.0'
+//}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+/**
+ * project生命周期
+ */
+//没发现执行
+/*this.beforeEvaluate {
+    println("配置阶段开始前的回调。。。。。")
+}
+this.afterEvaluate {
+    println("配置阶段完成以后的回调。。。。。")
+}
+//没发现执行
+this.gradle.buildStarted {
+    println("执行阶段执行开始。。。。。")
+}
+this.gradle.buildFinished {
+    println("执行阶段执行完毕。。。。。")
+}
+this.gradle.beforeProject {
+    println("beforeProject执行回调。。。。。")
+}
+this.gradle.afterProject {
+    println("afterProject执行回调。。。。。")
+}
+//this.gradle.addBuildListener(new BuildListener() {})
+*//**
+ * 和上面progect是一样的
+ *//*
+this.gradle.addProjectEvaluationListener(new ProjectEvaluationListener() {
+    @Override
+    void beforeEvaluate(Project project) {
+        println("beforeEvaluateListener:" + project.name)
+    }
+
+    @Override
+    void afterEvaluate(Project project, ProjectState state) {
+        println("afterEvaluateListener:" + project.name)
+    }
+})*/
+//D:\androidxm\groovyme\GradleDemo>gradlew clean
+//setting配置初始化回调
+//
+//> Configure project :
+//afterEvaluateListener:GradleDemo
+//afterProject执行回调。。。。。
+//配置阶段完成以后的回调。。。。。
+//
+//> Configure project :app
+//beforeEvaluateListener:app
+//beforeProject执行回调。。。。。
+//afterEvaluateListener:app
+//afterProject执行回调。。。。。
+//
+//
+//BUILD SUCCESSFUL in 1s
+//2 actionable tasks: 2 up-to-date
+//执行阶段执行完毕。。。。。
+//D:\androidxm\groovyme\GradleDemo>
+
+/**
+ * 练习project相关api
+ */
+
+def getMyAllProjects() {
+    def projects = this.getAllprojects()
+    projects.eachWithIndex { Project project, int index ->
+        if (index == 0) {
+            println("----root project:----" + project.name)
+        } else {
+            println("----sub project:----" + project.name)
+        }
+    }
+}
+//得到所有的project
+def getMyAllSubProjects() {
+    this.getSubprojects().each {
+        project ->
+            println("----sub project:----" + project.name)
+    }
+}
+
+def getMyAllSubProjects = {
+    this.getSubprojects().each {
+        project ->
+            println("----sub project:----" + project.name)
+    }
+}
+def getMySubproject = {
+    this.getSubprojects().each {
+        project ->
+            println("----sub project:----" + project.name)
+    }
+}
+//this.getMyAllProjects()
+//this.getMyAllSubProjects()
+//getMySubproject.call()
+
+def getMyParent() {
+    def parent = this.getParent()
+    if (parent != null) {
+        println("parent project:" + parent.name)
+    } else {
+        println("parent project:null")
+    }
+}
+//this.getMyParent()
+def getMyRootProject() {
+    def name = this.getRootProject().name
+    println("root project:${name}")
+}
+
+this.getMyRootProject()
+
+/**
+ * 可以通过路径name找到project做相关的操作
+ */
+def testProject = project("test") {
+    apply plugin: 'com.android.application'
+    group "lrtest"
+    dependencies {
+
+    }
+    //println("-----"+it.name)
+}
+//println("----------"+testProject.group)
+
+//println("the rootdir:"+this.getRootDir().absolutePath)
+//println("the builddir:"+this.getBuildDir().absolutePath)
+//println("the projectdir:"+this.getProjectDir().absolutePath)
+/**
+ * 通过路径获取文件内容
+ * @param path
+ * @return
+ */
+def getFileContent(String path) {
+    try {
+        //new file（）这种是传绝对路径，file（）这种是相当于当前工程查找
+        def file = file(path)
+        return file.text
+    } catch (GradleException e) {
+        e.printStackTrace()
+    }
+    return null
+}
+//println(getFileContent("version.gradle"))

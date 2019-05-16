@@ -1,0 +1,93 @@
+import groovy.xml.MarkupBuilder
+
+// inputs 可以接受很多类型 outputs 只能file 类型
+
+/**
+ * 需求1通过输入输出生成xml版本信息
+ * 还是扩展属性这种，防止xml定义重名不好搞
+ */
+ext {
+    versionName = rootProject.ext.Android.mVersionName
+    versionCode = rootProject.ext.Android.mVersionCode
+    versionInfo = "平安通版本:${versionName}发布了。。"
+    releaseinfoFile = file('releases.xml')
+    if (releaseinfoFile != null && !releaseinfoFile.exists()) {
+        //如果文件不存在就建立
+        releaseinfoFile.createNewFile()
+    }
+}
+
+
+class VersionMsg {
+    String versionCode
+    String versionName
+    String versionInfo
+}
+/**
+ * 写入版本xml
+ */
+task writeVersionXmlTask {
+    group "lrm"
+    inputs.property("versionName", this.versionName)
+    inputs.property("versionCode", this.versionCode)
+    inputs.property("versionInfo", this.versionInfo)
+    //指定输出
+    outputs.file releaseinfoFile
+    doLast {
+        //开始执行生成xml文件
+        def data = inputs.getProperties()
+        File outfile = outputs.files.singleFile
+        //Map 直接可以赋值给对象 牛比
+        def versionMsgObj = new VersionMsg(data)
+
+        def sw = new StringWriter()
+        def markBuilder = new MarkupBuilder(sw)
+
+        //这个操作也就是生成sw 字符串
+        markBuilder.root() {
+            release() {
+                versionName(versionMsgObj.versionName)
+                versionCode(versionMsgObj.versionCode)
+                versionInfo(versionMsgObj.versionInfo)
+            }
+        }
+
+        //文件 写入
+        outfile.withWriter {
+            writer ->
+                writer.append(sw.toString())
+        }
+//      outfile.withDataOutputStream {
+//          output->
+//              output.writeUTF(sw.toString())
+//      }
+
+    }
+}
+//这块有问题
+task readVersionXmlTask {
+    group "lrm"
+    inputs.file releaseinfoFile
+    doLast {
+        def file = inputs.files.singleFile
+        println("----readVersionXmlTask---file.text:----" + file.text)
+    }
+}
+
+task testReleaseTask {
+    group "lrm"
+    dependsOn writeVersionXmlTask, readVersionXmlTask
+    doLast {
+        println("testReleaseTask 输出完成。。。")
+    }
+}
+
+task readXmlTestTask {
+    group "lrm"
+    def srcFile = file('releases.xml')
+    doLast {
+        def reponse = new XmlParser().parseText(srcFile.text)
+       // println("readXmlTestTask------"+reponse)
+       println(srcFile.text)
+    }
+}

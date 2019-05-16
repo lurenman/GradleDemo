@@ -1,0 +1,3 @@
+include ':app', ':test'
+println("setting配置初始化回调")
+
