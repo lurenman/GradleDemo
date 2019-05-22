@@ -2,7 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion Android.mCompileSdkVersion
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ["libs"]//指定jnilib
+            res.srcDirs = ["src/main/res", "src/main/res-play", "src/main/res-good"]//指定res文件路径
+        }
 
+    }
     defaultConfig {
         applicationId "tianque.com.test"
         minSdkVersion 17
@@ -32,5 +38,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
 if (isLoadTest) {
-   // println("test-------properties:isLoadTest")
+    // println("test-------properties:isLoadTest")
 }
+

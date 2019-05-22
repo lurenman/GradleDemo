@@ -1,3 +1,5 @@
+import com.android.build.gradle.api.ApplicationVariant
+
 apply plugin: 'com.android.application'
 apply from: this.file("releaseinfo.gradle")
 android {
@@ -194,6 +196,17 @@ task taskZ {
     mustRunAfter taskY
     doLast {
         println("dolast........taskZ")
+    }
+}
+
+this.afterEvaluate {
+    this.android.applicationVariants.all { variant ->
+      //  println("the variant name:${variant.name}")
+       // variant.checkManifest 可以通过变体拿到task
+        variant.checkManifest.doLast {
+            println("the variant.checkManifest.name :${it.name}")
+        }
+      //  println("the variant.checkManifest.name :${variant.checkManifest.name}")
     }
 }
 
