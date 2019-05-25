@@ -9,11 +9,16 @@ buildscript {
     repositories {
         google()
         jcenter()
+        maven {
+            //D:/androidxm/groovyme/GradleDemo
+            url uri("../GradleDemo/repos")
+        }
     }
     //配置我们工程插件依赖地址
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.3'
-
+        //格式为-->group:module:version
+      classpath 'com.lrm.plugin:myplugin:1.0.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

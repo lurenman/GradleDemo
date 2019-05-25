@@ -2,6 +2,8 @@ import com.android.build.gradle.api.ApplicationVariant
 
 apply plugin: 'com.android.application'
 apply from: this.file("releaseinfo.gradle")
+apply plugin: "com.lrm.gradle.myplugin"
+apply plugin: "com.lrm.plugin.localplugin"
 android {
     // compileSdkVersion this.mCompileSdkVersion
     //  android.mCompileSdkVersion 这种定义会android冲突，要不改变map key
@@ -201,12 +203,12 @@ task taskZ {
 
 this.afterEvaluate {
     this.android.applicationVariants.all { variant ->
-      //  println("the variant name:${variant.name}")
-       // variant.checkManifest 可以通过变体拿到task
+        //  println("the variant name:${variant.name}")
+        // variant.checkManifest 可以通过变体拿到task
         variant.checkManifest.doLast {
             println("the variant.checkManifest.name :${it.name}")
         }
-      //  println("the variant.checkManifest.name :${variant.checkManifest.name}")
+        //  println("the variant.checkManifest.name :${variant.checkManifest.name}")
     }
 }
 

@@ -1,3 +1,3 @@
-include ':app', ':test'
+include ':app', ':test', ':myplugin', ':buildSrc'
 println("setting配置初始化回调")
 

@@ -1,0 +1,24 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+dependencies {
+    //gradle sdk
+    implementation gradleApi()
+    //groovy sdk
+    implementation localGroovy()
+}
+repositories {
+    mavenCentral()
+}
+group='com.lrm.plugin'//这个指外面生成的包名com.lrm.plugin.myplugin.1.0.0
+version='1.0.1'//版本 可以理解为根据数字定义一个分类包而已
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            //提交到远程服务器：
+            repository(url: uri('../repos'))
+        }
+    }
+}
+
+
